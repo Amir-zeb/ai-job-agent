@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Job from "@/lib/models/Job";
-import { analyzeJobRelevance } from "@/lib/ai";
-import { JobT } from "@/app/jobs/types";
 
 export async function GET() {
     try {
@@ -12,10 +10,9 @@ export async function GET() {
         const data = await res.json();
 
         // First element is metadata, skip it
-        const jobs = data.slice(1,5);
+        const jobs = data.slice(1);
 
         for (const job of jobs) {
-            // const aiResult = await analyzeJobRelevance(job.description);
             await Job.updateOne(
                 { url: job.url },
                 {
@@ -29,9 +26,6 @@ export async function GET() {
                     post_date: new Date(job.date),
                     description: job.description,
                     source: "RemoteOK",
-                    // aiScore: aiResult.score,
-                    // isRelevant: aiResult.isRelevant,
-                    // aiReason: aiResult.reason,
                 },
                 { upsert: true }
             );
