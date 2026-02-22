@@ -11,6 +11,9 @@ const JobSchema = new mongoose.Schema({
     post_date: Date,
     description: String,
     source: String,
+    aiScore: { type: Number, default: 0 },
+    isRelevant: { type: Boolean, default: false },
+    aiReason: { type: String, default: "" },
     createdAt: { type: Date, default: Date.now },
 });
 
