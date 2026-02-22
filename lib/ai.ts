@@ -6,64 +6,112 @@ type AIResponse = {
     reason: string;
 };
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not defined");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
     generationConfig: {
-        responseMimeType: "application/json", // Forces pure JSON output
+        temperature: 0.2,
+        maxOutputTokens: 200,
+        responseMimeType: "application/json",
     },
 });
 
-const myProfile = `
-Full Stack MERN Developer
-3+ years experience
-Strong in React, Next.js, Node.js, MongoDB
-Looking for remote jobs
-Prefer remote or international roles
-`;
+function safeParseJSON(text: string): AIResponse {
+    try {
+        const cleaned = text
+            .replace(/```json/g, "")
+            .replace(/```/g, "")
+            .trim();
+
+        const parsed = JSON.parse(cleaned);
+
+        if (
+            typeof parsed.score === "number" &&
+            typeof parsed.isRelevant === "boolean" &&
+            typeof parsed.reason === "string"
+        ) {
+            return parsed;
+        }
+
+        throw new Error("Invalid structure");
+    } catch {
+        return {
+            score: 0,
+            isRelevant: false,
+            reason: "Invalid AI response",
+        };
+    }
+}
 
 export async function analyzeJobRelevance(
     description: string
 ): Promise<AIResponse> {
     try {
+        if (!description) {
+            return {
+                score: 0,
+                isRelevant: false,
+                reason: "Empty job description",
+            };
+        }
+
+        const lower = description.toLowerCase();
+
+        const hasRelevantStack =
+            lower.includes("react") ||
+            lower.includes("node") ||
+            lower.includes("next") ||
+            lower.includes("javascript") ||
+            lower.includes("typescript");
+
+        if (!hasRelevantStack) {
+            return {
+                score: 0,
+                isRelevant: false,
+                reason: "No relevant JS stack mentioned",
+            };
+        }
+
         const prompt = `
-You are a strict job relevance classifier.
+You are a strict job matching assistant.
 
-Return ONLY valid JSON.
+Candidate Profile:
+- 5 years full stack developer
+- Skills: React, Next.js, Node.js, Express, MongoDB, TypeScript, PostgreSQL
+- Interested in: Remote frontend, MERN, full-stack roles
+- Not interested in: Python, PHP, .NET
 
-Format:
+Rules:
+- Score: 0 to 100
+- isRelevant: true if score >= 60
+- Be strict
+- Reason max 20 words
+
+Return ONLY JSON:
 {
+  "score": number,
   "isRelevant": boolean,
-  "score": number between 0 and 100,
   "reason": string
 }
 
-Candidate Profile:
-${myProfile}
-
-Job Description:
-${description}
+Job:
+${description.slice(0, 1800)}
 `;
 
         const result = await model.generateContent(prompt);
-
         const text = result.response.text();
 
-        const parsed: AIResponse = JSON.parse(text);
-
-        // Extra safety validation
-        if (
-            typeof parsed.isRelevant !== "boolean" ||
-            typeof parsed.score !== "number" ||
-            typeof parsed.reason !== "string"
-        ) {
-            throw new Error("Invalid AI response structure");
-        }
-
-        return parsed;
+        return safeParseJSON(text);
     } catch (error) {
         console.error("AI ERROR:", error);
+
         return {
             isRelevant: false,
             score: 0,
