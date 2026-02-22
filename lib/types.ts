@@ -13,5 +13,6 @@ export type JobT = {
     aiScore: number,
     isRelevant: boolean,
     aiReason: string,
+    aiRated: string,
     createdAt: Date,
 }

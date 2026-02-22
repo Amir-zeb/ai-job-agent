@@ -1,6 +1,6 @@
 "use client"
 
-import { JobT } from "../types";
+import { JobT } from "@/lib/types";
 
 type Props = {
     jobDetails: JobT;

@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
 import Job from "@/lib/models/Job";
-import { JobT } from "./types";
+import { JobT } from "@/lib/types";
+
 import JobList from "./_components/jobList";
 
 export default async function JobsPage() {
@@ -17,7 +18,7 @@ export default async function JobsPage() {
 
     return (
         <div className="min-h-screen relative">
-            <h1 className="text-4xl border-b-2 p-2 sticky top-0 bg-white">Job Listings</h1>
+            <h1 className="text-4xl border-b-2 p-2 sticky top-0 bg-white z-10">Job Listings</h1>
             <JobList jobs={formattedJobs} />
         </div>
     );

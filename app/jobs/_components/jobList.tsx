@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react";
-import { JobT } from "../types";
 import JobCard from "./jobCard";
 import JobDetails from "./jobDetails";
+import { JobT } from "@/lib/types";
 
 type Props = {
     jobs: JobT[];
