@@ -10,5 +10,8 @@ export type JobT = {
     post_date: Date,
     description: string,
     source: string,
+    aiScore: number,
+    isRelevant: boolean,
+    aiReason: string,
     createdAt: Date,
 }
