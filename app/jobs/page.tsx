@@ -7,7 +7,7 @@ import JobList from "./_components/jobList";
 export default async function JobsPage() {
     await connectDB();
     const jobs = await Job.find()
-        .sort({ aiScore: -1 })
+        .sort({ aiScore: -1, aiRated: -1 })
         .lean();
 
     // Convert ObjectId to string
@@ -18,7 +18,7 @@ export default async function JobsPage() {
 
     return (
         <div className="min-h-screen relative">
-            <h1 className="text-4xl border-b-2 p-2 sticky top-0 bg-white z-10">Job Listings</h1>
+            <h1 className="text-4xl border-b p-2 bg-white">Job Listing</h1>
             <JobList jobs={formattedJobs} />
         </div>
     );

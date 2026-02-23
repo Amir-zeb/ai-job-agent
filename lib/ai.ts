@@ -65,11 +65,12 @@ export async function analyzeJobRelevance(
         const lower = description.toLowerCase();
 
         const hasRelevantStack =
-            lower.includes("react") ||
-            lower.includes("node") ||
-            lower.includes("next") ||
             lower.includes("javascript") ||
-            lower.includes("typescript");
+            lower.includes("typescript") ||
+            lower.includes("react") ||
+            lower.includes("next") ||
+            lower.includes("node") ||
+            lower.includes("express");
 
         if (!hasRelevantStack) {
             return {

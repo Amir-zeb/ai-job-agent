@@ -1,18 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #025182;
+  --background: #ffffff;
 }
 
 * {
-  padding: 0;
-  margin: 0;
   box-sizing: border-box;
 }
 
 body {
-  /* background: #025182; */
   background: var(--background);
   color: #333;
   font-family: Arial, Helvetica, sans-serif;
+  padding: 0;
+  margin: 0;
 }

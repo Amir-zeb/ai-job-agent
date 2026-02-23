@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Job from "@/lib/models/Job";
+import DOMPurify from "isomorphic-dompurify";
 
 export async function GET() {
     try {
@@ -24,7 +25,7 @@ export async function GET() {
                     salary_max: job.salary_max,
                     url: job.url,
                     post_date: new Date(job.date),
-                    description: job.description,
+                    description: DOMPurify.sanitize(job.description),
                     source: "RemoteOK",
                 },
                 { upsert: true }

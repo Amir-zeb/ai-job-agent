@@ -20,7 +20,7 @@ export function startCron() {
     cron.schedule("* * * * *", async () => {
         console.log("rating job...");
         try {
-            // await fetch(`${domain}/api/jobs/rate`);
+            await fetch(`${domain}/api/jobs/rate/fetch`);
             console.log("job rated successfully");
         } catch (error) {
             console.error("Cron failed for job rating:", error);
