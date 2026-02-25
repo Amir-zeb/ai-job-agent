@@ -9,7 +9,7 @@ type Props = {
 
 const JobCard = ({ job, setSelectedJob }: Props) => {
     const score = Number(job.aiScore || 0)
-    const badgeColor = score > 4 && score < 7 ? 'bg-blue-400 inset-ring-blue-900 text-white' : score > 7 && score < 11 ? 'bg-blue-400 inset-ring-blue-900 text-white' : 'bg-gray-400/10 text-gray-400 inset-ring-gray-900/20'
+    const badgeColor = score > 40 && score < 70 ? 'bg-blue-400 inset-ring-blue-900 text-white' : score > 70 && score <= 100 ? 'bg-blue-400 inset-ring-blue-900 text-white' : 'bg-gray-400/10 text-gray-400 inset-ring-gray-900/20'
 
     return (
         <button className="border-0 bg-transparent text-start cursor-pointer" onClick={() => setSelectedJob(job)}>

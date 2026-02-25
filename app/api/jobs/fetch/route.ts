@@ -15,16 +15,16 @@ export async function GET() {
 
         for (const job of jobs) {
             await Job.updateOne(
-                { url: job.url },
+                { url: job.url, aiRated: false },
                 {
                     title: job.position,
                     company: job.company,
                     location: job.location,
                     salary: job.salary,
-                    salary_min: job.salary_min,
-                    salary_max: job.salary_max,
+                    salaryMin: job.salary_min,
+                    salaryMax: job.salary_max,
                     url: job.url,
-                    post_date: new Date(job.date),
+                    postDate: new Date(job.date),
                     description: DOMPurify.sanitize(job.description),
                     source: "RemoteOK",
                 },
