@@ -16,7 +16,7 @@ export function startCron() {
         }
     });
 
-    // Run Every 5 seconds to rate job. its a free tier so one job at a time
+    // Run Every 15 seconds to rate job. its a free tier so only 5 request per minute
     cron.schedule("*/5 * * * * *", async () => {
         console.log("rating job...");
         try {

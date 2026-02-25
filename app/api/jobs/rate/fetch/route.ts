@@ -4,7 +4,7 @@ import Job from "@/lib/models/Job";
 import { analyzeJobRelevance } from "@/lib/ai";
 import AiUsage from "@/lib/models/AiUsage";
 
-// 20 free request per day
+// 20 request per day limit for gemini free tier
 const DAILY_LIMIT = 20;
 
 function getTodayString() {

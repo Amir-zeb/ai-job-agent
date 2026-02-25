@@ -17,7 +17,7 @@ export default async function JobsPage() {
     }));
 
     return (
-        <div className="min-h-screen relative">
+        <div className="min-h-screen bg-gray-50 relative">
             <h1 className="text-4xl border-b p-2 bg-white">Job Listing</h1>
             <JobList jobs={formattedJobs} />
         </div>
