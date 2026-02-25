@@ -16,3 +16,9 @@ export type JobT = {
     aiRated: string,
     createdAt: Date,
 }
+
+export type AiUsageT = {
+    _id: string,
+    count: number,
+    date: string,
+}

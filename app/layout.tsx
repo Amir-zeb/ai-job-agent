@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { startCron } from "@/lib/cron";
 
-startCron();
+// only run when you need to fetch or rate jobs
+// startCron();
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
