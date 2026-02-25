@@ -1,8 +1,9 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
 type AIResponse = {
     isRelevant: boolean;
     score: number;
+    requestUsed: boolean;
     reason: string;
 };
 
@@ -19,33 +20,31 @@ const model = genAI.getGenerativeModel({
     generationConfig: {
         temperature: 0.2,
         maxOutputTokens: 200,
-        responseMimeType: "application/json",
     },
 });
 
 function safeParseJSON(text: string): AIResponse {
     try {
-        const cleaned = text
-            .replace(/```json/g, "")
-            .replace(/```/g, "")
-            .trim();
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
 
-        const parsed = JSON.parse(cleaned);
-
-        if (
-            typeof parsed.score === "number" &&
-            typeof parsed.isRelevant === "boolean" &&
-            typeof parsed.reason === "string"
-        ) {
-            return parsed;
+        if (!jsonMatch) {
+            throw new Error("No JSON found");
         }
 
-        throw new Error("Invalid structure");
+        const parsed = JSON.parse(jsonMatch[0]);
+
+        return {
+            score: parsed.score ?? 0,
+            isRelevant: parsed.isRelevant ?? false,
+            reason: parsed.reason ?? "Invalid AI response",
+            requestUsed: true,
+        };
     } catch {
         return {
             score: 0,
             isRelevant: false,
             reason: "Invalid AI response",
+            requestUsed: true,
         };
     }
 }
@@ -58,6 +57,7 @@ export async function analyzeJobRelevance(
             return {
                 score: 0,
                 isRelevant: false,
+                requestUsed: false,
                 reason: "Empty job description",
             };
         }
@@ -76,6 +76,7 @@ export async function analyzeJobRelevance(
             return {
                 score: 0,
                 isRelevant: false,
+                requestUsed: false,
                 reason: "No relevant JS stack mentioned",
             };
         }
@@ -86,7 +87,7 @@ You are a strict job matching assistant.
 Candidate Profile:
 - 5 years full stack developer
 - Skills: React, Next.js, Node.js, Express, MongoDB, TypeScript, PostgreSQL
-- Interested in: Remote frontend, MERN, full-stack roles
+- Interested in: Remote frontend, MERN, onsite, hybrid, full-stack roles
 - Not interested in: Python, PHP, .NET
 
 Rules:
@@ -106,8 +107,25 @@ Job:
 ${description.slice(0, 1800)}
 `;
 
-        const result = await model.generateContent(prompt);
+        // const result = await model.generateContent(prompt);
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        score: { type: SchemaType.NUMBER },
+                        isRelevant: { type: SchemaType.BOOLEAN },
+                        reason: { type: SchemaType.STRING },
+                    },
+                    required: ["score", "isRelevant", "reason"],
+                },
+            },
+        });
+        console.log("🚀 ~ analyzeJobRelevance ~ result:", result)
         const text = result.response.text();
+        console.log("🚀 ~ analyzeJobRelevance ~ text:", text)
 
         return safeParseJSON(text);
     } catch (error) {
@@ -115,6 +133,7 @@ ${description.slice(0, 1800)}
 
         return {
             isRelevant: false,
+            requestUsed: false,
             score: 0,
             reason: "AI processing failed",
         };
