@@ -11,6 +11,12 @@ This project demonstrates:
 -   Cron-based automation
 -   Cost-aware system design
 
+## Screenshots
+
+![Screenshot 1](/screenshot-1.png)
+![Screenshot 2](/screenshot-2.png)
+![Screenshot 3](/screenshot-3.png)
+![Screenshot 4](/screenshot-4.png)
 
 ## What This Project Does
 
@@ -108,13 +114,13 @@ Two background cron tasks:
 
 ### 🔹 Job Fetch Cron
 
--   Runs every hour
+-   Runs every 15 minutes
 -   Fetches jobs from RemoteOK
 -   Saves or updates in MongoDB
 
 ### 🔹 Job Rating Cron
 
--   Runs every 5 seconds
+-   Runs every 15 seconds
 -   Picks one unrated job
 -   Checks daily AI quota
 -   Sends to Gemini for scoring
