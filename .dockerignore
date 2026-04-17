@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.gitignore
+.vscode
+
+coverage
+.eslintcache
+
+Dockerfile
+docker-compose.yml
+.env.local
