@@ -14,6 +14,7 @@ export type JobT = {
     isRelevant: boolean,
     aiReason: string,
     aiRated: string,
+    ruleBasedScore: number,
     createdAt: Date,
 }
 
