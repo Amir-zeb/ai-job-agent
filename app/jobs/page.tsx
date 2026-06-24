@@ -3,6 +3,7 @@ import Job from "@/lib/models/Job";
 import { JobT } from "@/lib/types";
 
 import JobList from "./_components/jobList";
+import Link from "next/link";
 
 export default async function JobsPage() {
     await connectDB();
@@ -24,7 +25,9 @@ export default async function JobsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 relative">
-            <h1 className="text-4xl border-b p-2 bg-white">Job Listing</h1>
+            <Link href="/">
+                <h1 className="text-2xl border-b p-2 bg-white">Dashboard</h1>
+            </Link>
             <JobList jobs={formattedJobs} />
         </div>
     );
