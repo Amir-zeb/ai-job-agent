@@ -7,7 +7,13 @@ import JobList from "./_components/jobList";
 export default async function JobsPage() {
     await connectDB();
     const jobs = await Job.find()
-        .sort({ aiScore: -1, aiRated: -1 })
+        .sort({
+            aiRated: -1,
+            aiScore: -1,
+            isRelevant: -1,
+            ruleBasedScore: -1,
+            postDate: -1,
+        })
         .lean();
 
     // Convert ObjectId to string
