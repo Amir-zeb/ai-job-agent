@@ -1,5 +1,5 @@
 "use client";
-
+import * as React from 'react';
 import { JobT } from "@/lib/types";
 
 type Props = {
@@ -7,10 +7,18 @@ type Props = {
 };
 
 const JobDetails = ({ jobDetails }: Props) => {
-    const score = Number(jobDetails.aiScore || 0);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [error, setError] = React.useState<string | unknown>(null);
+    const score = Number(jobDetails?.analysis?.aiScore || 0);
+    const isAnalyzed = jobDetails?.analysis?.isAnalyzed || false;
+    const aiReason = jobDetails?.analysis?.reason || 'Job not analyzed yet.';
+
+    React.useEffect(() => {
+        console.log(isLoading, error);
+    }, [isLoading, error]);
 
     const getBadgeStyles = () => {
-        if (!jobDetails.aiRated) {
+        if (!isAnalyzed) {
             return "bg-gray-100 text-gray-500 border-gray-200";
         }
 
@@ -23,6 +31,38 @@ const JobDetails = ({ jobDetails }: Props) => {
         }
 
         return "bg-red-100 text-red-600 border-red-200";
+    };
+
+    const analyzeJob = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const res = await fetch("/api/agent/analyze", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    jobId: jobDetails._id,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to analyze job");
+            }
+
+            console.log(data);
+
+            // We'll update the UI with the response later
+        } catch (error) {
+            console.error(error);
+            setError(error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -47,7 +87,7 @@ const JobDetails = ({ jobDetails }: Props) => {
                         <span
                             className={`px-3 py-1 text-xs font-semibold rounded-full border ${getBadgeStyles()}`}
                         >
-                            {jobDetails.aiRated
+                            {isAnalyzed
                                 ? `AI Score: ${score}`
                                 : "Not Rated"}
                         </span>
@@ -58,13 +98,13 @@ const JobDetails = ({ jobDetails }: Props) => {
                 <div className="border-t mb-6" />
 
                 {/* AI Insight */}
-                {jobDetails.aiRated && (
+                {isAnalyzed && (
                     <div className="mb-6 bg-white border rounded-lg p-4 shadow-sm">
                         <p className="text-xs font-medium text-gray-500 mb-1">
                             AI Insight
                         </p>
                         <p className="text-sm text-gray-700">
-                            {jobDetails.aiReason || "-"}
+                            {aiReason}
                         </p>
                     </div>
                 )}
@@ -79,7 +119,14 @@ const JobDetails = ({ jobDetails }: Props) => {
                 </div>
 
                 {/* Apply Button */}
-                <div className="text-center mt-10">
+                <div className="text-center mt-10 flex flex-row justify-center gap-1">
+                    <button
+                        className="inline-block px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition"
+                        onClick={analyzeJob}
+                        disabled={isAnalyzed}
+                    >
+                        Analyze job
+                    </button>
                     <a
                         href={jobDetails.url}
                         target="_blank"
