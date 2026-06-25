@@ -44,7 +44,7 @@ export async function GET(request: Request) {
             const ruleBasedScore = calculateScore(description);
 
             await Job.updateOne(
-                { url: job.url, aiRated: false },
+                { url: job.url, analysis: { isAnalyzed: false } },
                 {
                     title: job.position,
                     company: job.company,
