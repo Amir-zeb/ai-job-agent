@@ -9,7 +9,6 @@ export async function POST(request: Request) {
         const { jobId } = await request.json();
 
         const result = await analyzeJob(jobId);
-
         return NextResponse.json(result);
     } catch (error) {
         return NextResponse.json(
