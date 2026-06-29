@@ -20,7 +20,14 @@ const JobSchema = new mongoose.Schema({
         recommendation: { type: String, default: "" },
         reason: { type: String, default: "" },
         strengths: { type: [String], default: [] },
-        missingSkills: { type: [String], default: [] },
+        missingSkills: {
+            type: [{
+                skill: { type: String, required: true },
+                priority: { type: String, enum: ["High", "Medium", "Low"], required: true },
+                reason: { type: String, required: true },
+            }],
+            default: [],
+        },
         salaryAssessment: { type: String, default: "" },
         coverLetter: { type: String, default: "" },
         email: {
