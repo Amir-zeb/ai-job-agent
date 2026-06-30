@@ -5,7 +5,7 @@ interface ToastT {
     message: string | null
 }
 
-const ToastMessage = ({ type, message }: ToastT) => {
+const Toast = ({ type, message }: ToastT) => {
     const [open, setOpen] = useState(false);
     const bgColor = type === "Success" ? 'bg-green-200' : type === "Error" ? ' bg-red-200' : 'bg-yellow-200';
     const containerBgColor = type === "Success" ? 'bg-green-50' : type === "Error" ? ' bg-red-50' : 'bg-yellow-50';
@@ -58,4 +58,4 @@ const ToastMessage = ({ type, message }: ToastT) => {
     );
 }
 
-export default ToastMessage;
+export default Toast;
