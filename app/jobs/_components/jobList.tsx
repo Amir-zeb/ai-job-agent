@@ -9,17 +9,20 @@ type Props = {
     jobs: JobT[];
 };
 
+type SelectedJobT = JobT | null
+
 const JobList = ({ jobs }: Props) => {
-    const [selectedJob, setSelectedJob] = useState<JobT | null>(null);
+    const [jobId, setJobId] = useState<string | null>(null);
+    const _selectedJob: SelectedJobT = jobId ? jobs.find(x => x._id === jobId) ?? null : null;
 
     return (
         <div className="flex flex-row gap-2 p-2">
             <div className="flex flex-col flex-1 gap-2">
                 {jobs && jobs.map((job) => (
-                    <JobCard job={job} key={job._id} setSelectedJob={() => setSelectedJob(job)} />
+                    <JobCard job={job} key={job._id} selectedJobId={jobId} setSelectedJob={() => setJobId(job._id)} />
                 ))}
             </div>
-            {selectedJob && <JobDetails jobDetails={selectedJob} />}
+            {_selectedJob && <JobDetails jobDetails={_selectedJob} />}
         </div>
     );
 }
