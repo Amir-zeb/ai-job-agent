@@ -15,18 +15,18 @@ export default async function Home() {
 
   // Job statistics
   const totalJobs: number = await Job.countDocuments();
-  const totalRatedJobs: number = await Job.countDocuments({ aiRated: true });
-  const totalUnratedJobs: number = await Job.countDocuments({ aiRated: false });
+  const totalRatedJobs: number = await Job.countDocuments({ 'analysis.isAnalyzed': true });
+  const totalUnratedJobs: number = await Job.countDocuments({ 'analysis.isAnalyzed': false });
   const totalBestMatchJobs: number = await Job.countDocuments({
     isRelevant: true,
     ruleBasedScore: { $gte: 75 },
   });
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
+    <main className="min-h-screen p-6">
       {/* Page Title */}
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-center mb-8">
+        <h1 className="text-3xl font-bold text-center text-(--primary) mb-8">
           AI Job Rating Dashboard
         </h1>
 
@@ -38,12 +38,12 @@ export default async function Home() {
           <StatCard title="Total Unrated Jobs" value={totalUnratedJobs} />
           <StatCard title="Best Match Jobs (≥ 75)" value={totalBestMatchJobs} />
         </div>
-        
+
         {/* Navigation */}
         <div className="text-center mt-10">
           <Link
             href="/jobs"
-            className="px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition"
+            className="px-6 py-3 bg-(--primary) font-bold text-(--secondary) rounded-lg hover:opacity-90 transition"
           >
             View Jobs →
           </Link>
@@ -56,8 +56,8 @@ export default async function Home() {
 // Reusable Stat Card Component
 function StatCard({ title, value }: { title: string; value: number }) {
   return (
-    <div className="bg-white shadow-md rounded-xl p-6 text-center border">
-      <p className="text-gray-500 text-sm mb-2">{title}</p>
+    <div className="shadow-md bg-(--primary) text-(--secondary) rounded-xl p-6 text-center border">
+      <p className="text-sm mb-2 font-bold">{title}</p>
       <p className="text-2xl font-bold">{value}</p>
     </div>
   );
