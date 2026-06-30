@@ -1,17 +1,64 @@
 "use client";
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { JobT } from "@/lib/types";
-import Accordion from './accordion';
-import ToastMessage from './toast';
+import Accordion from '@/app/components/accordion';
+import Toast from '@/app/components/toast';
+import { useRouter } from 'next/navigation';
+import { Badge } from '@/app/components/badge';
+import { Document, Page, StyleSheet, Text } from '@react-pdf/renderer';
+import Html from 'react-pdf-html';
 
 type Props = {
     jobDetails: JobT;
 };
 
+// Disable SSR to prevent Node.js environment errors during build
+const PDFDownloadLink = dynamic(
+    () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
+    { ssr: false }
+);
+
+const styles = StyleSheet.create({
+    page: {
+        padding: 30,
+        backgroundColor: '#ffffff',
+    },
+    text: {
+        fontSize: 12,
+        lineHeight: 1.5,
+        color: '#111827',
+    },
+});
+
+const stripHtmlToPlainText = (html: string) => {
+    return html
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&amp;/gi, '&')
+        .replace(/&lt;/gi, '<')
+        .replace(/&gt;/gi, '>')
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
+        .replace(/\s+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+};
+
+const CoverLetterDocument = ({ content }: { content?: string }) => (
+    <Document>
+        <Page size="A4" style={styles.page}>
+            <Html style={styles.text}>{content?.replace('[Candidate Name]','Amir Zeb') || "<p>Cover letter not available.</p>"}</Html>
+        </Page>
+    </Document>
+);
+
 const JobDetails = ({ jobDetails }: Props) => {
     const [isLoading, setIsLoading] = React.useState(false);
     const [message, setMessage] = React.useState<string | null>(null);
     const [type, setType] = React.useState<'Error' | 'Success' | 'Warning' | null>(null);
+    const router = useRouter()
 
     const analysis = jobDetails?.analysis
     const score = Number(analysis?.aiScore || 0);
@@ -21,22 +68,6 @@ const JobDetails = ({ jobDetails }: Props) => {
     const missingSkills = analysis?.missingSkills
     const salaryAssessment = analysis?.salaryAssessment;
     const coverLetter = analysis?.coverLetter;
-
-    const getBadgeStyles = () => {
-        if (!isAnalyzed) {
-            return "bg-gray-100 text-gray-500 border-gray-200";
-        }
-
-        if (score >= 80) {
-            return "bg-green-100 text-green-700 border-green-200";
-        }
-
-        if (score >= 50) {
-            return "bg-blue-100 text-blue-700 border-blue-200";
-        }
-
-        return "bg-red-100 text-red-600 border-red-200";
-    };
 
     const analyzeJob = async () => {
         try {
@@ -60,6 +91,7 @@ const JobDetails = ({ jobDetails }: Props) => {
             }
             setType('Success')
             setMessage('Job analyzed successfully')
+            router.refresh();
         } catch (error) {
             setType('Error')
             setMessage(error instanceof Error ? error.message : 'Failed to analyze job');
@@ -70,15 +102,16 @@ const JobDetails = ({ jobDetails }: Props) => {
 
     const AiInsight = () => (
         <>
-            <p className="text-sm text-gray-700 mb-2">
-                {aiReason}
-            </p>
-            <p className="text-sm text-gray-700 mb-2">
-                <strong>Strengths:</strong> {strengths}
-            </p>
-            <p className="text-sm text-gray-700 mb-2">
-                <strong>Missing Skills:</strong>
-                <>
+            <div className='mb-2 text-sm text-(--secondary)'>
+                <p>{aiReason}</p>
+            </div>
+            <div className='text-sm mb-2 text-(--secondary)'>
+                <p className="font-bold">Strengths:</p>
+                <p>{strengths}</p>
+            </div>
+            <div className='mb-2 text-sm text-(--secondary)'>
+                <p className="font-bold">Missing Skills:</p>
+                <p>
                     {Array.isArray(missingSkills) && missingSkills.length ? missingSkills.map(({ skill, priority, reason }, i) => {
                         return <React.Fragment key={i}>
                             <br />
@@ -90,33 +123,44 @@ const JobDetails = ({ jobDetails }: Props) => {
                             {missingSkills.length > 1 && < hr />}
                         </React.Fragment>
                     }) : 'None'}
-                </>
-            </p>
-            <p className="text-sm text-gray-700 mb-2">
-                <strong>Salary Assessment:</strong> {salaryAssessment}
-            </p>
-            <p className="text-sm text-gray-700">
-                <strong>Cover Letter:</strong>
-                <br />
-            </p>
-            <div
-                className='mb-2'
-                dangerouslySetInnerHTML={{
-                    __html: coverLetter || "<p>No description available.</p>",
-                }}
-            />
-            <p className="text-sm text-gray-700">
-                <strong>Email:</strong>
-            </p>
-            <p className="text-sm text-gray-700">
-                <strong>Subject:</strong> {analysis?.email?.subject}
-            </p>
-            <div
-                className='mb-2'
-                dangerouslySetInnerHTML={{
-                    __html: analysis?.email?.body || "<p>No description available.</p>",
-                }}
-            />
+                </p>
+            </div>
+            <div className='text-sm mb-2 text-(--secondary)'>
+                <p className="font-bold">Salary Assessment:</p>
+                <p>{salaryAssessment}</p>
+            </div>
+            <div className='text-sm mb-2 text-(--secondary)'>
+                <p className="font-bold">Cover Letter:</p>
+                <div
+                    dangerouslySetInnerHTML={{
+                        __html: coverLetter || "<p>Cover letter not available.</p>",
+                    }}
+                />
+                <PDFDownloadLink
+                    document={<CoverLetterDocument content={coverLetter} />}
+                    fileName="cover-letter.pdf"
+                >
+                    {({ loading }) => (
+                        <button
+                            disabled={loading || !coverLetter}
+                            className="inline-block text-base text-[12px] px-2 py-2 bg-black text-white rounded-lg hover:opacity-90 transition mt-2 mb-2 disabled:opacity-50"
+                        >
+                            {loading ? 'Preparing document...' : 'Download PDF'}
+                        </button>
+                    )}
+                </PDFDownloadLink>
+            </div>
+            <div className='text-sm mb-2 text-(--secondary)'>
+                <p className="font-bold">Email:</p>
+                <div>
+                    <p><strong>Subject:</strong> {analysis?.email?.subject}</p>
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: analysis?.email?.body || "<p>No description available.</p>",
+                        }}
+                    />
+                </div>
+            </div>
             {/* <div className="text-center mt-10 flex flex-row justify-center gap-1">
                 <button
                     className="inline-block text-base text-[12px] px-2 py-2 bg-black text-white rounded-lg hover:opacity-90 transition"
@@ -141,7 +185,7 @@ const JobDetails = ({ jobDetails }: Props) => {
         {
             title: 'Job Ad', content: <>
                 {/* Job Description */}
-                <div className="prose prose-sm max-w-none text-gray-800">
+                <div className="prose prose-sm max-w-none text-(--secondary)">
                     <div
                         dangerouslySetInnerHTML={{
                             __html: jobDetails.description || "<p>No description available.</p>",
@@ -155,7 +199,7 @@ const JobDetails = ({ jobDetails }: Props) => {
                         href={jobDetails.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block px-6 py-3 bg-black text-white rounded-lg hover:opacity-90 transition"
+                        className="inline-block px-6 py-3 bg-(--secondary) text-(--primary) rounded-lg hover:scale-110 transition"
                     >
                         View Original Job →
                     </a>
@@ -166,38 +210,35 @@ const JobDetails = ({ jobDetails }: Props) => {
 
     return (
         <>
-            <div className="flex-1 h-screen overflow-y-auto sticky top-0 bg-gray-50 border-l">
+            <div className="flex-1 h-screen overflow-y-auto sticky top-0 bg-(--primary) border-l">
                 <div className="max-w-3xl mx-auto p-8">
 
                     {/* Header Section */}
                     <div className="mb-6">
                         <div className="flex justify-between items-start gap-4">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900">
+                                <h2 className="text-2xl font-bold text-(--secondary)">
                                     {jobDetails.title || "-"}
                                 </h2>
-                                <p className="text-gray-600 mt-1">
+                                <p className="text-(--secondary) mt-1">
                                     {jobDetails.company || "-"}
                                 </p>
-                                <p className="text-sm text-gray-400">
+                                <p className="text-sm text-(--secondary)">
                                     {jobDetails.location || "Remote"}
                                 </p>
                                 {!isAnalyzed && <button
-                                    className="inline-block mt-2 px-6 py-2 text-[14px] mb-4 bg-black text-white rounded-lg hover:opacity-90 transition"
+                                    className="inline-block mt-2 px-6 py-2 text-[14px] mb-4 bg-(--secondary) text-(--primary) rounded-lg hover:scale-110 transition"
                                     onClick={analyzeJob}
                                     disabled={isAnalyzed}
                                 >
-                                    {isLoading ? "...Server Request" : "Analyze Job"}
+                                    {isLoading ? "...AI Analyzing Job" : "Analyze Job"}
                                 </button>}
                             </div>
-
-                            <span
-                                className={`px-3 py-1 text-xs font-semibold rounded-full border ${getBadgeStyles()}`}
-                            >
-                                {isAnalyzed
+                            <Badge
+                                label={isAnalyzed
                                     ? `AI Score: ${score}`
                                     : "Not Rated"}
-                            </span>
+                            />
                         </div>
                     </div>
 
@@ -206,7 +247,7 @@ const JobDetails = ({ jobDetails }: Props) => {
                     <Accordion items={faqItems} />
                 </div>
             </div>
-            <ToastMessage message={message} type={type} />
+            <Toast message={message} type={type} />
         </>
     );
 };
