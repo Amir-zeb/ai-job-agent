@@ -49,7 +49,7 @@ const stripHtmlToPlainText = (html: string) => {
 const CoverLetterDocument = ({ content }: { content?: string }) => (
     <Document>
         <Page size="A4" style={styles.page}>
-            <Html style={styles.text}>{content?.replace('[Candidate Name]','Amir Zeb') || "<p>Cover letter not available.</p>"}</Html>
+            <Html style={styles.text}>{content?.replace('[Candidate Name]', 'Amir Zeb') || "<p>Cover letter not available.</p>"}</Html>
         </Page>
     </Document>
 );
@@ -111,19 +111,23 @@ const JobDetails = ({ jobDetails }: Props) => {
             </div>
             <div className='mb-2 text-sm text-(--secondary)'>
                 <p className="font-bold">Missing Skills:</p>
-                <p>
-                    {Array.isArray(missingSkills) && missingSkills.length ? missingSkills.map(({ skill, priority, reason }, i) => {
-                        return <React.Fragment key={i}>
-                            <br />
-                            <strong>Skill</strong>:{skill}
-                            <br />
-                            <strong>priority</strong>:{priority}
-                            <br />
-                            <strong>reason</strong>:{reason}
-                            {missingSkills.length > 1 && < hr />}
-                        </React.Fragment>
-                    }) : 'None'}
-                </p>
+                <div>
+                    {Array.isArray(missingSkills) && missingSkills.length ? (
+                        missingSkills.map(({ skill, priority, reason }, i) => (
+                            <React.Fragment key={i}>
+                                <p className='mt-2'>
+                                    <strong>Skill {(i + 1)}</strong>: {skill}
+                                    <br />
+                                    <strong>Priority</strong>: {priority}
+                                    <br />
+                                    <strong>Reason</strong>: {reason}
+                                </p>
+                            </React.Fragment>
+                        ))
+                    ) : (
+                        <p>None</p>
+                    )}
+                </div>
             </div>
             <div className='text-sm mb-2 text-(--secondary)'>
                 <p className="font-bold">Salary Assessment:</p>
@@ -161,22 +165,6 @@ const JobDetails = ({ jobDetails }: Props) => {
                     />
                 </div>
             </div>
-            {/* <div className="text-center mt-10 flex flex-row justify-center gap-1">
-                <button
-                    className="inline-block text-base text-[12px] px-2 py-2 bg-black text-white rounded-lg hover:opacity-90 transition"
-                    onClick={() => { }}
-                    disabled={isAnalyzed}
-                >
-                    Cover Letter
-                </button>
-                <button
-                    className="inline-block text-base text-[12px] px-2 py-2 bg-black text-white rounded-lg hover:opacity-90 transition"
-                    onClick={() => { }}
-                    disabled={isAnalyzed}
-                >
-                    Email
-                </button>
-            </div> */}
         </>
     )
 
