@@ -11,8 +11,8 @@ function normalizeAnalysis(analysis: any): JobAnalysisT {
         reason: analysis?.reason ?? "",
         strengths: Array.isArray(analysis?.strengths)
             ? analysis.strengths : [],
-        missingSkills: Array.isArray(analysis?.missingSkill)
-            ? analysis?.missingSkill : [],
+        missingSkills: Array.isArray(analysis?.missingSkills)
+            ? analysis?.missingSkills : [],
         salaryAssessment: typeof analysis?.salaryAssessment === "string" ? analysis.salaryAssessment : "",
         coverLetter: typeof analysis?.coverLetter === "string"
             ? analysis.coverLetter : "",
@@ -50,6 +50,7 @@ export async function analyzeJob(jobId: string): Promise<{ cached: false; analys
 
     // Analyze with AI
     const analysis = await analyzeJobWithAI(job);
+    console.log("🚀 ~ analyzeJob ~ analysis:", analysis)
     // const analysis = data.analysis;
 
     await incrementUsage();
